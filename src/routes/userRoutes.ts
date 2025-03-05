@@ -4,7 +4,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/user/user/{userId}:
+ * /api/v1/user/{userId}:
  *   delete:
  *     summary: Delete a user
  *     description: Deletes a user by their ID
@@ -24,6 +24,6 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.delete("/user/:userId", deleteUser);
+router.delete("/:userId", deleteUser);
 
 export default router;
