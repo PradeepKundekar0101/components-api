@@ -172,8 +172,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 };
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    const { userId } = req.params;
+    const user = await User.findById(userId);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });

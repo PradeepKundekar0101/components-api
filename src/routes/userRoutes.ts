@@ -7,6 +7,5 @@ const router = express.Router();
 router.post('/create-user', createUser);
 router.get('/sendotp', sendOtpResend);
 router.post('/login',loginUser);
-router.post('/delete-user',deleteUser)
-
+router.delete("/user/:userId", deleteUser);
 export default router;
