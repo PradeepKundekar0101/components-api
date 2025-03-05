@@ -3,6 +3,7 @@ import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
+
 export const createUser = async (
   req: Request,
   res: Response
@@ -40,9 +41,9 @@ export const createUser = async (
       return;
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date();
-    otpExpiry.setMinutes(otpExpiry.getMinutes() + 2); // OTP expires in 2 minutes
+    // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // const otpExpiry = new Date();
+    // otpExpiry.setMinutes(otpExpiry.getMinutes() + 2); // OTP expires in 2 minutes
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -53,21 +54,21 @@ export const createUser = async (
       email,
       password: hashedPassword,
       phone,
-      verified: false,
-      otp,
-      otpExpiry,
+      verified: true,
+      // otp,
+      // otpExpiry,
     });
 
     await newUser.save();
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    // const resend = new Resend(process.env.RESEND_API_KEY);
 
-    await resend.emails.send({
-      from: "riderghost10791@gmail.com",
-      to: [email],
-      subject: "Verify Your Email",
-      html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
-    });
+    // await resend.emails.send({
+    //   from: "riderghost10791@gmail.com",
+    //   to: [email],
+    //   subject: "Verify Your Email",
+    //   html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
+    // });
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
@@ -107,26 +108,26 @@ export const sendOtpResend = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    // const { email } = req.body;
+    // const user = await User.findOne({ email });
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
+    // if (!user) {
+    //   res.status(404).json({ message: "User not found" });
+    //   return;
+    // }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 2 * 60 * 1000); // Expires in 2 min
 
-    user.otp = otp;
-    user.otpExpiry = otpExpiry;
-    await user.save();
+    // user.otp = otp;
+    // user.otpExpiry = otpExpiry;
+    // await user.save();
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
-      to: ["delivered@resend.dev"],
+      from: 'Acme <onboarding@resend.dev>',
+    to: ['delivered@resend.dev'],
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
