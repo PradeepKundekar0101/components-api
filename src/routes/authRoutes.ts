@@ -1,8 +1,11 @@
 import express from "express";
 import {
   createUser,
+  forgotPassword,
   loginUser,
+  resetPassword,
   sendOtpResend,
+  verifyOtp,
 } from "../controllers/authController";
 
 const router = express.Router();
@@ -71,7 +74,10 @@ router.post("/signup", createUser);
  *       500:
  *         description: Server error
  */
-router.get("/sendotp", sendOtpResend);
+router.post("/sendotp", sendOtpResend);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.post("/verifyotp", verifyOtp);
 
 /**
  * @swagger
