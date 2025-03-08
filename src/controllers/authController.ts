@@ -54,7 +54,7 @@ export const createUser = async (
       email,
       password: hashedPassword,
       phone,
-      verified: true,
+      verified: false,
       otp,
       otpExpiry,
     });
@@ -69,11 +69,11 @@ export const createUser = async (
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
-    const token = jwt.sign(
-      { id: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET as string
-    );
-    res.status(201).json({ message: "User registered successfully",token  });
+    // const token = jwt.sign(
+    //   { id: newUser._id, email: newUser.email },
+    //   process.env.JWT_SECRET as string
+    // );
+    res.status(201).json({ message: "User registered successfully"});
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
   }
@@ -215,7 +215,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, otp, password } = req.body;
+    const { email,password } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -224,16 +224,16 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
 
     // Check if OTP matches and is not expired
-    if (user.otp !== otp || new Date() > (user.otpExpiry ?? new Date(0))) {
-      res.status(400).json({ message: "Invalid or expired OTP" });
-      return;
-    }
+    // if (user.otp !== otp || new Date() > (user.otpExpiry ?? new Date(0))) {
+    //   res.status(400).json({ message: "Invalid or expired OTP" });
+    //   return;
+    // }
 
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-    user.otp = undefined;
-    user.otpExpiry = undefined;
+    // user.otp = undefined;
+    // user.otpExpiry = undefined;
     await user.save();
 
     res.status(200).json({ message: "Password reset successfully." });

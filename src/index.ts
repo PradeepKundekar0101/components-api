@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import { specs } from "./config/swagger";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
+import productRoutes from "./routes/productRoutes";
 dotenv.config();
 const PORT = 8000;
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/auth", authRoutes);
 
 const connectDB = async () => {
