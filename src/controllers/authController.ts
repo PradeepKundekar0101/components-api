@@ -69,11 +69,11 @@ export const createUser = async (
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
-    // const token = jwt.sign(
-    //   { id: newUser._id, email: newUser.email },
-    //   process.env.JWT_SECRET as string
-    // );
-    res.status(201).json({ message: "User registered successfully"});
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET as string
+    );
+    res.status(201).json({ message: "User registered successfully", token, userId: newUser._id });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
   }
@@ -215,28 +215,26 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email,password } = req.body;
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("-password"); // Exclude password
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    // Check if OTP matches and is not expired
-    // if (user.otp !== otp || new Date() > (user.otpExpiry ?? new Date(0))) {
-    //   res.status(400).json({ message: "Invalid or expired OTP" });
-    //   return;
-    // }
-
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
-    // user.otp = undefined;
-    // user.otpExpiry = undefined;
     await user.save();
 
-    res.status(200).json({ message: "Password reset successfully." });
+    // Generate login token after password reset
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET as string
+    );
+
+    res.status(200).json({ message: "Password reset and login successful", token, user });
   } catch (error) {
     console.error("Error in resetPassword:", error);
     res.status(500).json({ message: "Internal Server Error" });
