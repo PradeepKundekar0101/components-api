@@ -22,9 +22,12 @@ export const createUser = async (
         existingUser.otpExpiry = otpExpiry;
         await existingUser.save();
 
+        if (!process.env.FROM_MAIL) {
+          throw new Error("FROM_MAIL environment variable is not set");
+        }
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: "contact@pradeepkundekar.com",
+          from: process.env.FROM_MAIL,
           to: [email],
           subject: "Verify Your Email",
           html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
@@ -60,11 +63,14 @@ export const createUser = async (
     });
 
     await newUser.save();
+    if (!process.env.FROM_MAIL) {
+      throw new Error("FROM_MAIL environment variable is not set");
+    }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "contact@pradeepkundekar.com",
+      from: process.env.FROM_MAIL,
       to: [email],
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
@@ -196,11 +202,15 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
+    
+    if (!process.env.FROM_MAIL) {
+      throw new Error("FROM_MAIL environment variable is not set");
+    }
 
     // Send OTP email
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: "contact@pradeepkundekar.com",
+      from: process.env.FROM_MAIL,
       to: [email],
       subject: "Reset Your Password",
       html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
