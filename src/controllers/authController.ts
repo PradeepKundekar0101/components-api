@@ -3,6 +3,7 @@ import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
+
 export const createUser = async (
   req: Request,
   res: Response
@@ -21,9 +22,12 @@ export const createUser = async (
         existingUser.otpExpiry = otpExpiry;
         await existingUser.save();
 
+        if (!process.env.FROM_MAIL) {
+          throw new Error("FROM_MAIL environment variable is not set");
+        }
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-          from: "riderghost10791@gmail.com",
+          from: process.env.FROM_MAIL,
           to: [email],
           subject: "Verify Your Email",
           html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
@@ -59,17 +63,23 @@ export const createUser = async (
     });
 
     await newUser.save();
+    if (!process.env.FROM_MAIL) {
+      throw new Error("FROM_MAIL environment variable is not set");
+    }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "riderghost10791@gmail.com",
+      from: process.env.FROM_MAIL,
       to: [email],
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
-
-    res.status(201).json({ message: "User registered successfully" });
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET as string
+    );
+    res.status(201).json({ message: "User registered successfully", token, userId: newUser._id });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
   }
@@ -125,8 +135,8 @@ export const sendOtpResend = async (
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
-      to: ["delivered@resend.dev"],
+      from: 'contact@pradeepkundekar.com',
+    to: [email],
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
@@ -166,10 +176,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
     const token = jwt.sign(
       { id: user._id, email: user.email },
-      process.env.JWT_SECRET as string,
-      {
-        expiresIn: "1d",
-      }
+      process.env.JWT_SECRET as string
     );
 
     res.status(200).json({ message: "Login successful", token });
@@ -178,3 +185,70 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 2 * 60 * 1000); // OTP expires in 2 minutes
+
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+    
+    if (!process.env.FROM_MAIL) {
+      throw new Error("FROM_MAIL environment variable is not set");
+    }
+
+    // Send OTP email
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: process.env.FROM_MAIL,
+      to: [email],
+      subject: "Reset Your Password",
+      html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
+    });
+
+    res.status(200).json({ message: "Reset OTP sent to your email" });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("-password"); // Exclude password
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    await user.save();
+
+    // Generate login token after password reset
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET as string
+    );
+
+    res.status(200).json({ message: "Password reset and login successful", token, user });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
