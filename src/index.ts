@@ -39,7 +39,7 @@ connectDB()
   });
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World");
+  res.send("Components API"); 
 });
 app.listen(PORT, () => {
   console.log(`Server Running on PORT ${PORT}`);

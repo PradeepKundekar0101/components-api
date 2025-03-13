@@ -2,35 +2,38 @@ import { Request, Response } from "express";
 import Wishlist, { IWishlist } from "../models/Wishlist";
 import { AuthRequest } from "../middleware/authmiddleware";
 
-/**
- * @route POST /api/product
- * @desc Create a new product
- * @access Private
- */
 export const addToWishlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const {  Name, price, stock, imageUrl, Url, category, source, sourceImage, Image } = req.body;
+    const { objectID, productName, price, stock, imageUrl, productUrl, category, source, sourceImage } = req.body;
 
     if (!req.user) {
       res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
+    // Check if this product is already in the user's wishlist (by objectID)
+    const existingItem = await Wishlist.findOne({ userId: req.user.id, objectID });
+    
+    if (existingItem) {
+      res.status(200).json({ message: "Item already in wishlist", mongodbID: existingItem._id });
+      return;
+    }
+
     const newWishlist: IWishlist = new Wishlist({
-      Name,
+      objectID, 
+      productName,
       price,
       stock,
       imageUrl,
-      Url,
+      productUrl,
       category,
       source,
       sourceImage,
-      Image,
-      userId: req.user.id, // Assign userId from token
+      userId: req.user.id, 
     });
 
     await newWishlist.save();
-    res.status(201).json({ message: "Item added successfully" });
+    res.status(201).json({ message: "Item added successfully", mongodbID: newWishlist._id });
   } catch (error) {
     console.error("Error adding Item:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -53,14 +56,11 @@ export const getAllWishlist = async (req: AuthRequest, res: Response): Promise<v
   }
 };
 
-
-
-export const deleteWishlist = (async (req: AuthRequest, res: Response):Promise<void> => {
+export const deleteWishlist = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-
     if (!req.user) {
       res.status(401).json({ message: "Unauthorized" });
-      return 
+      return;
     }
 
     const wishlistId = req.params.id;
@@ -69,7 +69,7 @@ export const deleteWishlist = (async (req: AuthRequest, res: Response):Promise<v
 
     if (!item) {
       res.status(404).json({ message: "Item not found or unauthorized to delete" });
-      return
+      return;
     }
 
     await Wishlist.findByIdAndDelete(wishlistId);
@@ -79,4 +79,4 @@ export const deleteWishlist = (async (req: AuthRequest, res: Response):Promise<v
     console.error("Error deleting Item:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-});
+};
