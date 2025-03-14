@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: pradeepkundekar0101/components101-api:latest
+    ports:
+      - 8000:8000
+    environment:
+      - .env
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin

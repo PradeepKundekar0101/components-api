@@ -79,7 +79,13 @@ export const createUser = async (
       { id: newUser._id, email: newUser.email },
       process.env.JWT_SECRET as string
     );
-    res.status(201).json({ message: "User registered successfully", token, userId: newUser._id });
+    res
+      .status(201)
+      .json({
+        message: "User registered successfully",
+        token,
+        userId: newUser._id,
+      });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
   }
@@ -135,8 +141,8 @@ export const sendOtpResend = async (
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: 'contact@pradeepkundekar.com',
-    to: [email],
+      from: process.env.FROM_MAIL!,
+      to: [email],
       subject: "Verify Your Email",
       html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
     });
@@ -186,7 +192,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -202,7 +211,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
-    
+
     if (!process.env.FROM_MAIL) {
       throw new Error("FROM_MAIL environment variable is not set");
     }
@@ -223,7 +232,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
   }
 };
 
-export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select("-password"); // Exclude password
@@ -244,11 +256,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       process.env.JWT_SECRET as string
     );
 
-    res.status(200).json({ message: "Password reset and login successful", token, user });
+    res
+      .status(200)
+      .json({ message: "Password reset and login successful", token, user });
   } catch (error) {
     console.error("Error in resetPassword:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
