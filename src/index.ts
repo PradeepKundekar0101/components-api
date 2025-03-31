@@ -8,9 +8,14 @@ import { specs } from "./config/swagger";
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import wishlistRoutes from "./routes/wishlistRoutes";
+
+import index from "./lib/algolia";
+
 dotenv.config();
 const PORT = 8000;
 const app = express();
+
+dotenv.config();
 
 app.use(cors());
 app.use(express.json());
@@ -39,7 +44,7 @@ connectDB()
   });
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Components API"); 
+  res.send("Components API");
 });
 app.listen(PORT, () => {
   console.log(`Server Running on PORT ${PORT}`);

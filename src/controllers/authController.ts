@@ -30,7 +30,44 @@ export const createUser = async (
           from: process.env.FROM_MAIL,
           to: [email],
           subject: "Verify Your Email",
-          html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .logo { max-width: 200px; height: auto; }
+                .content { background-color: #f9f9f9; padding: 30px; border-radius: 8px; }
+                .otp { font-size: 32px; font-weight: bold; text-align: center; color: #bb282a; 
+                      letter-spacing: 5px; margin: 20px 0; padding: 15px; background-color: #f0f0f0; 
+                      border-radius: 4px; }
+                .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #777; }
+                .button { background-color: #bb282a; color: white; padding: 12px 30px; 
+                         text-decoration: none; border-radius: 4px; font-weight: bold; 
+                         display: inline-block; margin: 20px 0; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <img src="https://components101.com/sites/default/files/components101_logo_2.png" alt="Components101 Logo" class="logo">
+                </div>
+                <div class="content">
+                  <h2>Verify Your Email</h2>
+                  <p>Thank you for registering with Components101. Please use the verification code below to complete your registration:</p>
+                  <div class="otp">${otp}</div>
+                  <p>This code will expire in 2 minutes. If you didn't request this code, please ignore this email.</p>
+                </div>
+                <div class="footer">
+                  <p>© ${new Date().getFullYear()} Components101. All rights reserved.</p>
+                  <p>If you have any questions, please contact our support team.</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `,
         });
 
         res.status(200).json({
@@ -73,19 +110,54 @@ export const createUser = async (
       from: process.env.FROM_MAIL,
       to: [email],
       subject: "Verify Your Email",
-      html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .logo { max-width: 200px; height: auto; }
+            .content { background-color: #f9f9f9; padding: 30px; border-radius: 8px; }
+            .otp { font-size: 32px; font-weight: bold; text-align: center; color: #bb282a; 
+                  letter-spacing: 5px; margin: 20px 0; padding: 15px; background-color: #f0f0f0; 
+                  border-radius: 4px; }
+            .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #777; }
+            .button { background-color: #bb282a; color: white; padding: 12px 30px; 
+                     text-decoration: none; border-radius: 4px; font-weight: bold; 
+                     display: inline-block; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="https://components101.com/sites/default/files/components101_logo_2.png" alt="Components101 Logo" class="logo">
+            </div>
+            <div class="content">
+              <h2>Verify Your Email</h2>
+              <p>Thank you for registering with Components101. Please use the verification code below to complete your registration:</p>
+              <div class="otp">${otp}</div>
+              <p>This code will expire in 2 minutes. If you didn't request this code, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Components101. All rights reserved.</p>
+              <p>If you have any questions, please contact our support team.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
     });
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email },
       process.env.JWT_SECRET as string
     );
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully",
-        token,
-        userId: newUser._id,
-      });
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      userId: newUser._id,
+    });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error", error });
   }
@@ -144,7 +216,44 @@ export const sendOtpResend = async (
       from: process.env.FROM_MAIL!,
       to: [email],
       subject: "Verify Your Email",
-      html: `<p>Your OTP for email verification is: <strong>${otp}</strong></p>`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .logo { max-width: 200px; height: auto; }
+            .content { background-color: #f9f9f9; padding: 30px; border-radius: 8px; }
+            .otp { font-size: 32px; font-weight: bold; text-align: center; color: #bb282a; 
+                  letter-spacing: 5px; margin: 20px 0; padding: 15px; background-color: #f0f0f0; 
+                  border-radius: 4px; }
+            .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #777; }
+            .button { background-color: #bb282a; color: white; padding: 12px 30px; 
+                     text-decoration: none; border-radius: 4px; font-weight: bold; 
+                     display: inline-block; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="https://components101.com/sites/default/files/components101_logo_2.png" alt="Components101 Logo" class="logo">
+            </div>
+            <div class="content">
+              <h2>Verify Your Email</h2>
+              <p>Thank you for registering with Components101. Please use the verification code below to complete your registration:</p>
+              <div class="otp">${otp}</div>
+              <p>This code will expire in 2 minutes. If you didn't request this code, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Components101. All rights reserved.</p>
+              <p>If you have any questions, please contact our support team.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
     });
     if (error) {
       console.error({ error });
@@ -159,6 +268,7 @@ export const sendOtpResend = async (
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log("first");
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
@@ -222,7 +332,44 @@ export const forgotPassword = async (
       from: process.env.FROM_MAIL,
       to: [email],
       subject: "Reset Your Password",
-      html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .logo { max-width: 200px; height: auto; }
+            .content { background-color: #f9f9f9; padding: 30px; border-radius: 8px; }
+            .otp { font-size: 32px; font-weight: bold; text-align: center; color: #bb282a; 
+                  letter-spacing: 5px; margin: 20px 0; padding: 15px; background-color: #f0f0f0; 
+                  border-radius: 4px; }
+            .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #777; }
+            .button { background-color: #bb282a; color: white; padding: 12px 30px; 
+                     text-decoration: none; border-radius: 4px; font-weight: bold; 
+                     display: inline-block; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="https://components101.com/sites/default/files/components101_logo_2.png" alt="Components101 Logo" class="logo">
+            </div>
+            <div class="content">
+              <h2>Reset Your Password</h2>
+              <p>We received a request to reset your password. Please use the verification code below:</p>
+              <div class="otp">${otp}</div>
+              <p>This code will expire in 2 minutes. If you didn't request this code, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Components101. All rights reserved.</p>
+              <p>If you have any questions, please contact our support team.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
     });
 
     res.status(200).json({ message: "Reset OTP sent to your email" });
